@@ -39,7 +39,7 @@ The script runs detailed scans based on open ports detected in the initial scan.
 
 ### SSH
 #### Port: 22
-#### Scripts:
+##### Scripts:
 - ssh-auth-methods
 - ssh-brute (only if -b flag is set)
 - ssh-hostkey
@@ -55,59 +55,59 @@ The script runs detailed scans based on open ports detected in the initial scan.
 - ftp-vsftpd-backdoor
 
 ### SMTP
-- Port: 25
-- Scripts:
+#### Port: 25
+##### Scripts:
 - smtp-enum-users
 - smtp-commands
 - smtp-open-relay
 
 ### DNS
-- Port: 53
-- Scripts:
+#### Port: 53
+##### Scripts:
 - dns-brute
 - dns-cache-snoop
 - dns-zone-transfer
 
 ### POP3
-- Port: 110
-- Scripts:
+#### Port: 110
+##### Scripts:
 - pop3-capabilities
 - pop3-ntlm-info
 
 ### IMAP
-- Port: 143
-- Scripts:
+#### Port: 143
+##### Scripts:
 - imap-capabilities
 - imap-ntlm-info
 
 ### MySQL
-- Port: 3306
-- Scripts:
+#### Port: 3306
+##### Scripts:
 - mysql-enum
 - mysql-info
 - mysql-databases
 
 ### RDP
-- Port: 3389
-- Scripts:
+#### Port: 3389
+##### Scripts:
 - rdp-enum-encryption
 - rdp-vuln-ms12-020
 
 ### VNC
-- Port: 5900
-- Scripts:
+#### Port: 5900
+##### Scripts:
 - vnc-info
 - vnc-title
 
 ### HTTP Proxy
-- Port: 8080
-- Scripts:
+#### Port: 8080
+##### Scripts:
 - http-open-proxy
 - http-proxy-brute (only if -b flag is set)
 
 ### SMB/Samba
-- Ports: 137 (UDP), 139, 445
-- Scripts:
+#### Ports: 137 (UDP), 139, 445
+##### Scripts:
 - smb-enum-shares
 - smb-enum-users
 - smb-os-discovery
