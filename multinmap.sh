@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Function to print ASCII art
+print_ascii_art() {
+    cat << "EOF"
+ __    __     __  __     __         ______   __     __   __     __    __     ______     ______  
+/\ "-./  \   /\ \/\ \   /\ \       /\__  _\ /\ \   /\ "-.\ \   /\ "-./  \   /\  __ \   /\  == \ 
+\ \ \-./\ \  \ \ \_\ \  \ \ \____  \/_/\ \/ \ \ \  \ \ \-.  \  \ \ \-./\ \  \ \  __ \  \ \  _-/ 
+ \ \_\ \ \_\  \ \_____\  \ \_____\    \ \_\  \ \_\  \ \_\\"\_\  \ \_\ \ \_\  \ \_\ \_\  \ \_\   
+  \/_/  \/_/   \/_____/   \/_____/     \/_/   \/_/   \/_/ \/_/   \/_/  \/_/   \/_/\/_/   \/_/   
+EOF
+    printf "\033[31m%80s\033[0m\n" "written by Tommaso Casoni"
+}
+
 # Function to print usage
 usage() {
     echo "Usage: $0 -t|--target path_to_ip_port_list.txt [-b|--brute-force]"
@@ -182,6 +194,9 @@ scan_and_run_scripts() {
         echo "No SMB/Samba ports are open on $ip."
     fi
 }
+
+# Print ASCII art
+print_ascii_art
 
 # Read the input file line by line
 while IFS= read -r line; do
