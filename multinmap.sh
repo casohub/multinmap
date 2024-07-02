@@ -9,12 +9,14 @@ print_ascii_art() {
  \ \_\ \ \_\  \ \_____\  \ \_____\    \ \_\  \ \_\  \ \_\\"\_\  \ \_\ \ \_\  \ \_\ \_\  \ \_\   
   \/_/  \/_/   \/_____/   \/_____/     \/_/   \/_/   \/_/ \/_/   \/_/  \/_/   \/_/\/_/   \/_/   
 EOF
+    printf "\n"
     printf "\033[31m%80s\033[0m\n" "written by Tommaso Casoni"
+    printf "\n"
 }
 
 # Function to print usage
 usage() {
-    echo "Usage: $0 -t|--target path_to_ip_port_list.txt [-b|--brute-force]"
+    echo "Usage: $0 -t|--target path_to_ip_list.txt [-b|--brute-force]"
     exit 1
 }
 
@@ -44,34 +46,43 @@ if [ -z "${input_file}" ]; then
     usage
 fi
 
+# Run initial scan to determine open ports
+nmap -Pn -n -T4 -v --open -iL "$input_file" -oG initial_scan_results.txt
+
+# Parse initial scan results to create a file with IP:PORTS format
+while IFS= read -r line; do
+    if echo "$line" | grep -q "Host:"; then
+        ip=$(echo "$line" | awk '{print $2}')
+        ports=$(echo "$line" | grep -oP "\d+/open" | cut -d'/' -f1 | tr '\n' ',' | sed 's/,$//')
+        if [ -n "$ports" ]; then
+            echo "$ip:$ports" >> ip_port_list.txt
+        fi
+    fi
+done < initial_scan_results.txt
+
 # Function to scan for open ports and run appropriate scripts if specific ports are open
 scan_and_run_scripts() {
-    local ip=$1
-    local ports=$2
+    local ip=$(echo "$1" | cut -d':' -f1)
+    local ports=$(echo "$1" | cut -d':' -f2)
     local smb_open=false
 
-    echo "Scanning $ip on ports $ports with -Pn and -n"
-    # Perform the initial scan with -Pn and -n
-    scan_result=$(timeout 300 nmap -Pn -n -p "$ports" "$ip")
-    echo "$scan_result"
-
     # Check if port 22 is open
-    if echo "$scan_result" | grep -q '22/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '22'; then
         echo "Port 22 is open on $ip. Running SSH scripts..."
         if $brute_force; then
             echo "Including ssh-brute in the scan..."
-            timeout 300 nmap -Pn -n --script "ssh-*" -p 22 "$ip"
+            nmap -Pn -n --script "ssh-*" -p 22 "$ip"
         else
             echo "Excluding ssh-brute from the scan..."
             all_ssh_scripts=$(ls /usr/share/nmap/scripts/ssh-* | grep -v 'ssh-brute' | xargs -n1 basename | sed 's/.nse//' | tr '\n' ',' | sed 's/,$//')
-            timeout 300 nmap -Pn -n --script "$all_ssh_scripts" -p 22 "$ip"
+            nmap -Pn -n --script "$all_ssh_scripts" -p 22 "$ip"
         fi
     else
         echo "Port 22 is not open on $ip."
     fi
 
     # Check if port 21 is open
-    if echo "$scan_result" | grep -q '21/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '21'; then
         echo "Port 21 is open on $ip. Running FTP scripts..."
         if $brute_force; then
             echo "Including ftp-brute in the scan..."
@@ -80,76 +91,76 @@ scan_and_run_scripts() {
             echo "Excluding ftp-brute from the scan..."
             all_ftp_scripts=$(ls /usr/share/nmap/scripts/ftp-* | grep -v 'ftp-brute' | xargs -n1 basename | sed 's/.nse//' | tr '\n' ',' | sed 's/,$//')
         fi
-        timeout 300 nmap -Pn -n --script "$all_ftp_scripts" -p 21 "$ip"
+        nmap -Pn -n --script "$all_ftp_scripts" -p 21 "$ip"
     else
         echo "Port 21 is not open on $ip."
     fi
 
     # Check if port 25 is open
-    if echo "$scan_result" | grep -q '25/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '25'; then
         echo "Port 25 is open on $ip. Running SMTP scripts..."
         all_smtp_scripts="smtp-enum-users,smtp-commands,smtp-open-relay"
-        timeout 300 nmap -Pn -n --script "$all_smtp_scripts" -p 25 "$ip"
+        nmap -Pn -n --script "$all_smtp_scripts" -p 25 "$ip"
     else
         echo "Port 25 is not open on $ip."
     fi
 
     # Check if port 53 is open
-    if echo "$scan_result" | grep -q '53/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '53'; then
         echo "Port 53 is open on $ip. Running DNS scripts..."
         all_dns_scripts="dns-brute,dns-cache-snoop,dns-zone-transfer"
-        timeout 300 nmap -Pn -n --script "$all_dns_scripts" -p 53 "$ip"
+        nmap -Pn -n --script "$all_dns_scripts" -p 53 "$ip"
     else
         echo "Port 53 is not open on $ip."
     fi
 
     # Check if port 110 is open
-    if echo "$scan_result" | grep -q '110/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '110'; then
         echo "Port 110 is open on $ip. Running POP3 scripts..."
         all_pop3_scripts="pop3-capabilities,pop3-ntlm-info"
-        timeout 300 nmap -Pn -n --script "$all_pop3_scripts" -p 110 "$ip"
+        nmap -Pn -n --script "$all_pop3_scripts" -p 110 "$ip"
     else
         echo "Port 110 is not open on $ip."
     fi
 
     # Check if port 143 is open
-    if echo "$scan_result" | grep -q '143/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '143'; then
         echo "Port 143 is open on $ip. Running IMAP scripts..."
         all_imap_scripts="imap-capabilities,imap-ntlm-info"
-        timeout 300 nmap -Pn -n --script "$all_imap_scripts" -p 143 "$ip"
+        nmap -Pn -n --script "$all_imap_scripts" -p 143 "$ip"
     else
         echo "Port 143 is not open on $ip."
     fi
 
     # Check if port 3306 is open
-    if echo "$scan_result" | grep -q '3306/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '3306'; then
         echo "Port 3306 is open on $ip. Running MySQL scripts..."
         all_mysql_scripts="mysql-enum,mysql-info,mysql-databases"
-        timeout 300 nmap -Pn -n --script "$all_mysql_scripts" -p 3306 "$ip"
+        nmap -Pn -n --script "$all_mysql_scripts" -p 3306 "$ip"
     else
         echo "Port 3306 is not open on $ip."
     fi
 
     # Check if port 3389 is open
-    if echo "$scan_result" | grep -q '3389/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '3389'; then
         echo "Port 3389 is open on $ip. Running RDP scripts..."
         all_rdp_scripts="rdp-enum-encryption,rdp-vuln-ms12-020"
-        timeout 300 nmap -Pn -n --script "$all_rdp_scripts" -p 3389 "$ip"
+        nmap -Pn -n --script "$all_rdp_scripts" -p 3389 "$ip"
     else
         echo "Port 3389 is not open on $ip."
     fi
 
     # Check if port 5900 is open
-    if echo "$scan_result" | grep -q '5900/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '5900'; then
         echo "Port 5900 is open on $ip. Running VNC scripts..."
         all_vnc_scripts="vnc-info,vnc-title"
-        timeout 300 nmap -Pn -n --script "$all_vnc_scripts" -p 5900 "$ip"
+        nmap -Pn -n --script "$all_vnc_scripts" -p 5900 "$ip"
     else
         echo "Port 5900 is not open on $ip."
     fi
 
     # Check if port 8080 is open
-    if echo "$scan_result" | grep -q '8080/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '8080'; then
         echo "Port 8080 is open on $ip. Running HTTP Proxy scripts..."
         if $brute_force; then
             echo "Including http-proxy-brute in the scan..."
@@ -158,29 +169,25 @@ scan_and_run_scripts() {
             echo "Excluding http-proxy-brute from the scan..."
             all_http_proxy_scripts="http-open-proxy"
         fi
-        timeout 300 nmap -Pn -n --script "$all_http_proxy_scripts" -p 8080 "$ip"
+        nmap -Pn -n --script "$all_http_proxy_scripts" -p 8080 "$ip"
     else
         echo "Port 8080 is not open on $ip."
     fi
 
     # Check if port 445 is open
-    if echo "$scan_result" | grep -q '445/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '445'; then
         echo "Port 445 is open on $ip."
         smb_open=true
     fi
 
     # Check if port 139 is open
-    if echo "$scan_result" | grep -q '139/tcp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '139'; then
         echo "Port 139 is open on $ip."
         smb_open=true
     fi
 
     # Check if port 137 (UDP) is open
-    echo "Scanning $ip on port 137 UDP"
-    scan_result_udp=$(sudo timeout 300 nmap -sU -p 137 "$ip")
-    echo "$scan_result_udp"
-
-    if echo "$scan_result_udp" | grep -q '137/udp[[:space:]]\+open'; then
+    if echo "$ports" | grep -q '137'; then
         echo "Port 137 UDP is open on $ip."
         smb_open=true
     fi
@@ -198,16 +205,7 @@ scan_and_run_scripts() {
 # Print ASCII art
 print_ascii_art
 
-# Read the input file line by line
+# Read the IP:PORTS file and run detailed scans
 while IFS= read -r line; do
-    # Extract IP and port information
-    ip=$(echo "$line" | cut -d':' -f1)
-    ports=$(echo "$line" | cut -d':' -f2)
-
-    # Check if IP and ports are not empty
-    if [[ -n "$ip" && -n "$ports" ]]; then
-        scan_and_run_scripts "$ip" "$ports"
-    else
-        echo "Invalid line: $line"
-    fi
-done < "$input_file"
+    scan_and_run_scripts "$line"
+done < ip_port_list.txt
