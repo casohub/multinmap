@@ -38,8 +38,8 @@ The input file should contain one IP address per line. Example:
 The script runs detailed scans based on open ports detected in the initial scan. The following sections describe the scripts used for each protocol.
 
 ### SSH
-- Port: 22
-- Scripts:
+#### Port: 22
+#### Scripts:
 - ssh-auth-methods
 - ssh-brute (only if -b flag is set)
 - ssh-hostkey
