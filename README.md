@@ -32,6 +32,7 @@ The input file should contain one IP address per line. Example:
 192.168.0.1
 192.168.0.2
 192.168.0.3
+```
 
 ##Detailed Protocol Scans
 The script runs detailed scans based on open ports detected in the initial scan. The following sections describe the scripts used for each protocol.
