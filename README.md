@@ -33,17 +33,18 @@ The input file should contain one IP address per line. Example:
 192.168.0.2
 192.168.0.3
 
-Detailed Protocol Scans
+##Detailed Protocol Scans
 The script runs detailed scans based on open ports detected in the initial scan. The following sections describe the scripts used for each protocol.
 
-SSH
+###SSH
 Port: 22
 Scripts:
 ssh-auth-methods
 ssh-brute (only if -b flag is set)
 ssh-hostkey
 ssh-publickey-acceptance
-FTP
+
+###FTP
 Port: 21
 Scripts:
 ftp-anon
@@ -51,50 +52,59 @@ ftp-bounce
 ftp-brute (only if -b flag is set)
 ftp-proftpd-backdoor
 ftp-vsftpd-backdoor
-SMTP
+
+###SMTP
 Port: 25
 Scripts:
 smtp-enum-users
 smtp-commands
 smtp-open-relay
-DNS
+
+###DNS
 Port: 53
 Scripts:
 dns-brute
 dns-cache-snoop
 dns-zone-transfer
-POP3
+
+###POP3
 Port: 110
 Scripts:
 pop3-capabilities
 pop3-ntlm-info
-IMAP
+
+###IMAP
 Port: 143
 Scripts:
 imap-capabilities
 imap-ntlm-info
-MySQL
+
+###MySQL
 Port: 3306
 Scripts:
 mysql-enum
 mysql-info
 mysql-databases
-RDP
+
+###RDP
 Port: 3389
 Scripts:
 rdp-enum-encryption
 rdp-vuln-ms12-020
-VNC
+
+###VNC
 Port: 5900
 Scripts:
 vnc-info
 vnc-title
-HTTP Proxy
+
+###HTTP Proxy
 Port: 8080
 Scripts:
 http-open-proxy
 http-proxy-brute (only if -b flag is set)
-SMB/Samba
+
+###SMB/Samba
 Ports: 137 (UDP), 139, 445
 Scripts:
 smb-enum-shares
@@ -104,8 +114,9 @@ smb-protocols
 smb-security-mode
 smb-vuln-cve-2017-7494
 samba-vuln-cve-2012-1182
-Author
+
+##Author
 MultiNmap was created by Tommaso Casoni.
 
-License
+##License
 This script is licensed under the MIT License.
