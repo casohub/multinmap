@@ -32,7 +32,7 @@ if [ -z "${input_file}" ]; then
     usage
 fi
 
-# Function to scan for open ports and run SSH, FTP, and SMB/Samba scripts if ports 22, 21, 445, 139, or 137 (UDP) are open
+# Function to scan for open ports and run appropriate scripts if specific ports are open
 scan_and_run_scripts() {
     local ip=$1
     local ports=$2
@@ -71,6 +71,84 @@ scan_and_run_scripts() {
         timeout 300 nmap -Pn -n --script "$all_ftp_scripts" -p 21 "$ip"
     else
         echo "Port 21 is not open on $ip."
+    fi
+
+    # Check if port 25 is open
+    if echo "$scan_result" | grep -q '25/tcp[[:space:]]\+open'; then
+        echo "Port 25 is open on $ip. Running SMTP scripts..."
+        all_smtp_scripts="smtp-enum-users,smtp-commands,smtp-open-relay"
+        timeout 300 nmap -Pn -n --script "$all_smtp_scripts" -p 25 "$ip"
+    else
+        echo "Port 25 is not open on $ip."
+    fi
+
+    # Check if port 53 is open
+    if echo "$scan_result" | grep -q '53/tcp[[:space:]]\+open'; then
+        echo "Port 53 is open on $ip. Running DNS scripts..."
+        all_dns_scripts="dns-brute,dns-cache-snoop,dns-zone-transfer"
+        timeout 300 nmap -Pn -n --script "$all_dns_scripts" -p 53 "$ip"
+    else
+        echo "Port 53 is not open on $ip."
+    fi
+
+    # Check if port 110 is open
+    if echo "$scan_result" | grep -q '110/tcp[[:space:]]\+open'; then
+        echo "Port 110 is open on $ip. Running POP3 scripts..."
+        all_pop3_scripts="pop3-capabilities,pop3-ntlm-info"
+        timeout 300 nmap -Pn -n --script "$all_pop3_scripts" -p 110 "$ip"
+    else
+        echo "Port 110 is not open on $ip."
+    fi
+
+    # Check if port 143 is open
+    if echo "$scan_result" | grep -q '143/tcp[[:space:]]\+open'; then
+        echo "Port 143 is open on $ip. Running IMAP scripts..."
+        all_imap_scripts="imap-capabilities,imap-ntlm-info"
+        timeout 300 nmap -Pn -n --script "$all_imap_scripts" -p 143 "$ip"
+    else
+        echo "Port 143 is not open on $ip."
+    fi
+
+    # Check if port 3306 is open
+    if echo "$scan_result" | grep -q '3306/tcp[[:space:]]\+open'; then
+        echo "Port 3306 is open on $ip. Running MySQL scripts..."
+        all_mysql_scripts="mysql-enum,mysql-info,mysql-databases"
+        timeout 300 nmap -Pn -n --script "$all_mysql_scripts" -p 3306 "$ip"
+    else
+        echo "Port 3306 is not open on $ip."
+    fi
+
+    # Check if port 3389 is open
+    if echo "$scan_result" | grep -q '3389/tcp[[:space:]]\+open'; then
+        echo "Port 3389 is open on $ip. Running RDP scripts..."
+        all_rdp_scripts="rdp-enum-encryption,rdp-vuln-ms12-020"
+        timeout 300 nmap -Pn -n --script "$all_rdp_scripts" -p 3389 "$ip"
+    else
+        echo "Port 3389 is not open on $ip."
+    fi
+
+    # Check if port 5900 is open
+    if echo "$scan_result" | grep -q '5900/tcp[[:space:]]\+open'; then
+        echo "Port 5900 is open on $ip. Running VNC scripts..."
+        all_vnc_scripts="vnc-info,vnc-title"
+        timeout 300 nmap -Pn -n --script "$all_vnc_scripts" -p 5900 "$ip"
+    else
+        echo "Port 5900 is not open on $ip."
+    fi
+
+    # Check if port 8080 is open
+    if echo "$scan_result" | grep -q '8080/tcp[[:space:]]\+open'; then
+        echo "Port 8080 is open on $ip. Running HTTP Proxy scripts..."
+        if $brute_force; then
+            echo "Including http-proxy-brute in the scan..."
+            all_http_proxy_scripts="http-open-proxy,http-proxy-brute"
+        else
+            echo "Excluding http-proxy-brute from the scan..."
+            all_http_proxy_scripts="http-open-proxy"
+        fi
+        timeout 300 nmap -Pn -n --script "$all_http_proxy_scripts" -p 8080 "$ip"
+    else
+        echo "Port 8080 is not open on $ip."
     fi
 
     # Check if port 445 is open
