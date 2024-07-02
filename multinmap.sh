@@ -32,7 +32,7 @@ if [ -z "${input_file}" ]; then
     usage
 fi
 
-# Function to scan for open ports and run SSH and FTP scripts if ports 22 or 21 are open
+# Function to scan for open ports and run SSH, FTP, and SMB/Samba scripts if ports 22, 21, or 445, 139, or 137 (UDP) are open
 scan_and_run_scripts() {
     local ip=$1
     local ports=$2
@@ -41,6 +41,9 @@ scan_and_run_scripts() {
     # Perform the initial scan with -Pn and -n
     scan_result=$(nmap -Pn -n -p "$ports" "$ip")
     echo "$scan_result"
+
+    # Initialize smb_open flag
+    smb_open=false
 
     # Check if port 22 is open
     if echo "$scan_result" | grep -q '22/tcp[[:space:]]\+open'; then
@@ -64,6 +67,37 @@ scan_and_run_scripts() {
         nmap -Pn -n --script "$all_ftp_scripts" -p 21 "$ip"
     else
         echo "Port 21 is not open on $ip."
+    fi
+
+    # Check if port 445 is open
+    if echo "$scan_result" | grep -q '445/tcp[[:space:]]\+open'; then
+        echo "Port 445 is open on $ip."
+        smb_open=true
+    fi
+
+    # Check if port 139 is open
+    if echo "$scan_result" | grep -q '139/tcp[[:space:]]\+open'; then
+        echo "Port 139 is open on $ip."
+        smb_open=true
+    fi
+
+    # Check if port 137 (UDP) is open
+    echo "Scanning $ip on port 137 UDP"
+    scan_result_udp=$(sudo nmap -sU -p 137 "$ip")
+    echo "$scan_result_udp"
+
+    if echo "$scan_result_udp" | grep -q '137/udp[[:space:]]\+open'; then
+        echo "Port 137 UDP is open on $ip."
+        smb_open=true
+    fi
+
+    # Run SMB/Samba scripts if any of the SMB ports are open
+    if [ "$smb_open" = true ]; then
+        echo "Running SMB/Samba scripts on $ip..."
+        all_smb_scripts=$(ls /usr/share/nmap/scripts/smb-* /usr/share/nmap/scripts/samba-* 2>/dev/null | xargs -n1 basename | sed 's/.nse//' | tr '\n' ',' | sed 's/,$//')
+        sudo nmap -sU -sS --script "$all_smb_scripts" -p U:137,T:139,445 "$ip"
+    else
+        echo "No SMB/Samba ports are open on $ip."
     fi
 }
 
