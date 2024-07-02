@@ -38,83 +38,83 @@ The input file should contain one IP address per line. Example:
 The script runs detailed scans based on open ports detected in the initial scan. The following sections describe the scripts used for each protocol.
 
 ### SSH
-Port: 22
-Scripts:
-ssh-auth-methods
-ssh-brute (only if -b flag is set)
-ssh-hostkey
-ssh-publickey-acceptance
+- Port: 22
+- Scripts:
+- ssh-auth-methods
+- ssh-brute (only if -b flag is set)
+- ssh-hostkey
+- ssh-publickey-acceptance
 
 ### FTP
-Port: 21
-Scripts:
-ftp-anon
-ftp-bounce
-ftp-brute (only if -b flag is set)
-ftp-proftpd-backdoor
-ftp-vsftpd-backdoor
+- Port: 21
+- Scripts:
+- ftp-anon
+- ftp-bounce
+- ftp-brute (only if -b flag is set)
+- ftp-proftpd-backdoor
+- ftp-vsftpd-backdoor
 
 ### SMTP
-Port: 25
-Scripts:
-smtp-enum-users
-smtp-commands
-smtp-open-relay
+- Port: 25
+- Scripts:
+- smtp-enum-users
+- smtp-commands
+- smtp-open-relay
 
 ### DNS
-Port: 53
-Scripts:
-dns-brute
-dns-cache-snoop
-dns-zone-transfer
+- Port: 53
+- Scripts:
+- dns-brute
+- dns-cache-snoop
+- dns-zone-transfer
 
 ### POP3
-Port: 110
-Scripts:
-pop3-capabilities
-pop3-ntlm-info
+- Port: 110
+- Scripts:
+- pop3-capabilities
+- pop3-ntlm-info
 
 ### IMAP
-Port: 143
-Scripts:
-imap-capabilities
-imap-ntlm-info
+- Port: 143
+- Scripts:
+- imap-capabilities
+- imap-ntlm-info
 
 ### MySQL
-Port: 3306
-Scripts:
-mysql-enum
-mysql-info
-mysql-databases
+- Port: 3306
+- Scripts:
+- mysql-enum
+- mysql-info
+- mysql-databases
 
 ### RDP
-Port: 3389
-Scripts:
-rdp-enum-encryption
-rdp-vuln-ms12-020
+- Port: 3389
+- Scripts:
+- rdp-enum-encryption
+- rdp-vuln-ms12-020
 
 ### VNC
-Port: 5900
-Scripts:
-vnc-info
-vnc-title
+- Port: 5900
+- Scripts:
+- vnc-info
+- vnc-title
 
 ### HTTP Proxy
-Port: 8080
-Scripts:
-http-open-proxy
-http-proxy-brute (only if -b flag is set)
+- Port: 8080
+- Scripts:
+- http-open-proxy
+- http-proxy-brute (only if -b flag is set)
 
 ### SMB/Samba
-Ports: 137 (UDP), 139, 445
-Scripts:
-smb-enum-shares
-smb-enum-users
-smb-os-discovery
-smb-protocols
-smb-security-mode
-smb-vuln-cve-2017-7494
-samba-vuln-cve-2012-1182
+- Ports: 137 (UDP), 139, 445
+- Scripts:
+- smb-enum-shares
+- smb-enum-users
+- smb-os-discovery
+- smb-protocols
+- smb-security-mode
+- smb-vuln-cve-2017-7494
+- samba-vuln-cve-2012-1182
 
 ## Author
 MultiNmap was created by Tommaso Casoni.
