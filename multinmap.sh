@@ -62,7 +62,7 @@ mkdir -p nmaps
 mkdir -p testssls
 
 # Run initial scan to determine open ports
-nmap -Pn -n -T5 --open -iL "$input_file" -oG initial_scan_results.txt
+nmap -Pn -n --open -iL "$input_file" -oG initial_scan_results.txt
 
 # Ensure the file is created or clear previous results
 : > ip_port_list.txt
